@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Tasko — Driver{% endblock %}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Helvetica, Arial, sans-serif; max-width: 760px;
+               margin: 2em auto; padding: 0 1em; color: #1a1a1a; }
+        header { border-bottom: 2px solid #000; padding-bottom: 0.5em;
+                 margin-bottom: 1.5em; display: flex;
+                 justify-content: space-between; align-items: baseline; }
+        header h1 { margin: 0; font-size: 1.4em; }
+        nav { font-size: 0.9em; }
+        nav a, nav button {
+            margin-left: 1em; color: #0563c1; background: none;
+            border: 0; cursor: pointer; font-size: 1em;
+            text-decoration: none; padding: 0; }
+        h3 { margin-top: 1.6em; }
+        .ride { border: 1px solid #ddd; padding: 0.8em 1em;
+                margin-bottom: 0.6em; border-radius: 4px; }
+        .ride h4 { margin: 0 0 0.3em 0; }
+        .meta { color: #555; font-size: 0.9em; }
+        .actions { margin-top: 0.5em; display: flex; gap: 0.4em;
+                   flex-wrap: wrap; align-items: center; }
+        .actions form { margin: 0; }
+        button.primary, button.secondary, button.danger {
+            border: 0; padding: 0.4em 0.9em; cursor: pointer;
+            border-radius: 3px; margin: 0; font-size: 0.9em; }
+        button.primary   { background: #1a1a1a; color: white; }
+        button.secondary { background: #e8e8e8; color: #1a1a1a; }
+        button.danger    { background: #fff; color: #c62828;
+                           border: 1px solid #c62828; }
+        .empty { color: #888; font-style: italic; }
+        .status-requested   { color: #555; }
+        .status-accepted    { color: #0563c1; }
+        .status-in_progress { color: #b25e09; }
+        .status-completed   { color: #2e7d32; }
+        .status-cancelled   { color: #c62828; }
+        form.login p { margin: 0.6em 0; }
+        form.login input { width: 100%; padding: 0.4em;
+            box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px; }
+        form.login label { display: block; font-weight: bold;
+            margin-bottom: 0.2em; }
+        ul.messages { list-style: none; padding: 0; margin: 0 0 1em 0; }
+        ul.messages li {
+            padding: 0.5em 0.9em; border-radius: 3px;
+            margin-bottom: 0.4em; font-size: 0.95em; }
+        ul.messages li.error  { background: #fde7e7; color: #8b1313; }
+        ul.messages li.info   { background: #e8f0fa; color: #0a3d75; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tasko — Driver Dashboard</h1>
+        <nav>
+            {% if user.is_authenticated %}
+                <span class="meta">{{ user.username }}</span>
+                <form method="post" action="{% url 'logout' %}"
+                      style="display:inline">
+                    {% csrf_token %}
+                    <button type="submit">Log out</button>
+                </form>
+            {% endif %}
+        </nav>
+    </header>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for m in messages %}
+                <li class="{{ m.tags }}">{{ m }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>

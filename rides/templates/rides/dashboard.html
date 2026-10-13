@@ -1,0 +1,80 @@
+{% extends "rides/base.html" %}
+{% block title %}Dashboard — Tasko{% endblock %}
+{% block content %}
+    <h2>Welcome, {{ user.username }}</h2>
+
+    <h3>Pending requests</h3>
+    {% if pending %}
+        {% for ride in pending %}
+            <div class="ride">
+                <h4>
+                    <a href="{% url 'rides:ride_detail' ride.id %}">
+                        {{ ride.pickup_address }} → {{ ride.dropoff_address }}
+                    </a>
+                </h4>
+                <p class="meta">
+                    {{ ride.distance_km }} km
+                    {% if ride.fare %} · {{ ride.fare }} €{% endif %}
+                </p>
+                <div class="actions">
+                    <form method="post"
+                          action="{% url 'rides:accept' ride.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="primary">Accept</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty">No pending rides right now.</p>
+    {% endif %}
+
+    <h3>My active rides</h3>
+    {% if mine %}
+        {% for ride in mine %}
+            <div class="ride">
+                <h4>
+                    <a href="{% url 'rides:ride_detail' ride.id %}">
+                        {{ ride.pickup_address }} → {{ ride.dropoff_address }}
+                    </a>
+                </h4>
+                <p class="meta">
+                    <span class="status-{{ ride.status }}">
+                        {{ ride.get_status_display }}
+                    </span>
+                    · {{ ride.distance_km }} km
+                    {% if ride.fare %} · {{ ride.fare }} €{% endif %}
+                </p>
+                <div class="actions">
+                    {% if ride.status == 'accepted' %}
+                        <form method="post"
+                              action="{% url 'rides:start' ride.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="primary">
+                                Start ride
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% if ride.status == 'in_progress' %}
+                        <form method="post"
+                              action="{% url 'rides:complete' ride.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="primary">
+                                Complete ride
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% if ride.status == 'accepted' or ride.status == 'requested' %}
+                        <form method="post"
+                              action="{% url 'rides:cancel' ride.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="danger">Cancel</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty">You have no active rides.</p>
+    {% endif %}
+{% endblock %}

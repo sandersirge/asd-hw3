@@ -1,0 +1,25 @@
+{% extends "rides/base.html" %}
+{% block title %}{{ ride }} — Tasko{% endblock %}
+{% block content %}
+    <h2>{{ ride.pickup_address }} → {{ ride.dropoff_address }}</h2>
+    <p class="meta">
+        Status:
+        <span class="status-{{ ride.status }}">
+            {{ ride.get_status_display }}
+        </span>
+        · {{ ride.distance_km }} km
+        {% if ride.fare %} · {{ ride.fare }} €{% endif %}
+    </p>
+    <p class="meta">Requested at {{ ride.requested_at|date:"Y-m-d H:i" }}.
+    {% if ride.driver %} Driver: {{ ride.driver.username }}.{% endif %}
+    {% if ride.completed_at %}
+        Completed at {{ ride.completed_at|date:"Y-m-d H:i" }}.
+    {% endif %}
+    </p>
+
+    {% if ride.cancellation_reason %}
+        <p><strong>Cancelled:</strong> {{ ride.cancellation_reason }}</p>
+    {% endif %}
+
+    <p><a href="{% url 'rides:dashboard' %}">&larr; Back to dashboard</a></p>
+{% endblock %}
