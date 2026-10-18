@@ -101,8 +101,9 @@ def ride_detail(request, ride_id):
 
 @login_required
 def receipt(request, ride_id):
-    """End-of-trip receipt for a completed ride."""
-    ride = get_object_or_404(Ride, pk=ride_id)
+    """End-of-trip receipt for a completed ride. Only the assigned
+    driver may see it; anyone else gets a 404."""
+    ride = _get_own_ride(request, ride_id)
     return render(request, "rides/receipt.html", {"ride": ride})
 
 # ---------------------------------------------------------------------------
