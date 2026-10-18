@@ -52,13 +52,15 @@ def start_ride(request, ride_id):
 @login_required
 @require_POST
 def complete_ride(request, ride_id):
-    """Complete a ride that the current driver is in_progress on."""
+    """Complete a ride the current driver is in_progress on, then show
+    its receipt."""
     ride = _get_own_ride(request, ride_id)
     try:
         ride.complete()
     except (AttributeError, InvalidTransition) as exc:
         messages.error(request, _friendly_error(exc, "complete"))
-    return redirect(reverse("rides:dashboard"))
+        return redirect(reverse("rides:dashboard"))
+    return redirect(reverse("rides:receipt", args=[ride.id]))
 
 
 @login_required
@@ -97,6 +99,11 @@ def ride_detail(request, ride_id):
     ride = get_object_or_404(Ride, pk=ride_id)
     return render(request, "rides/detail.html", {"ride": ride})
 
+@login_required
+def receipt(request, ride_id):
+    """End-of-trip receipt for a completed ride."""
+    ride = get_object_or_404(Ride, pk=ride_id)
+    return render(request, "rides/receipt.html", {"ride": ride})
 
 # ---------------------------------------------------------------------------
 # Helpers

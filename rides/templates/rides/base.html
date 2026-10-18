@@ -53,6 +53,12 @@
             margin-bottom: 0.4em; font-size: 0.95em; }
         ul.messages li.error  { background: #fde7e7; color: #8b1313; }
         ul.messages li.info   { background: #e8f0fa; color: #0a3d75; }
+        dl.receipt { display: grid; grid-template-columns: max-content auto;
+                     gap: 0.3em 1.5em; margin: 0.8em 0 0 0; }
+        dl.receipt dt { color: #555; }
+        dl.receipt dd { margin: 0; text-align: right; }
+        dl.receipt dd.total { font-weight: bold; border-top: 1px solid #ddd;
+                              padding-top: 0.3em; }
     </style>
 </head>
 <body>

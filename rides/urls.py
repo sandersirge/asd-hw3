@@ -10,5 +10,6 @@ urlpatterns = [
     path("<int:ride_id>/accept/", views.accept_ride, name="accept"),
     path("<int:ride_id>/start/", views.start_ride, name="start"),
     path("<int:ride_id>/complete/", views.complete_ride, name="complete"),
+    path("<int:ride_id>/receipt/", views.receipt, name="receipt"),
     path("<int:ride_id>/cancel/", views.confirm_cancel, name="cancel"),
 ]

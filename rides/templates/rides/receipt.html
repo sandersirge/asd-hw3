@@ -1,0 +1,26 @@
+{% extends "rides/base.html" %}
+{% block title %}Receipt — Tasko{% endblock %}
+{% block content %}
+    <h2>Receipt</h2>
+
+    <div class="ride">
+        <h4>{{ ride.pickup_address }} → {{ ride.dropoff_address }}</h4>
+        <p class="meta">
+            Completed at {{ ride.completed_at|date:"Y-m-d H:i" }}
+            · Driver: {{ ride.driver.username }}
+        </p>
+
+        <dl class="receipt">
+            <dt>Distance</dt>
+            <dd id="receipt-distance">{{ ride.distance_km }} km</dd>
+
+            <dt>Surge</dt>
+            <dd id="receipt-surge">{% if ride.surge_multiplier == 1 %}None{% else %}×{{ ride.surge_multiplier }}{% endif %}</dd>
+
+            <dt>Total</dt>
+            <dd id="receipt-total" class="total">{{ ride.fare }} €</dd>
+        </dl>
+    </div>
+
+    <p><a href="{% url 'rides:dashboard' %}">&larr; Back to dashboard</a></p>
+{% endblock %}
