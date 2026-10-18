@@ -25,3 +25,9 @@ Feature: End-of-trip receipt
     And   the receipt shows the base fare as "8.50 €"
     And   the receipt shows the surge amount as "4.25 €"
     And   the receipt shows the total as "12.75 €"
+
+  Scenario: Another driver cannot read someone else's receipt
+    Given Mari has completed the ride
+    And   a driver named "Anna"
+    When  Anna opens the receipt for the ride
+    Then  Anna gets a 404 response

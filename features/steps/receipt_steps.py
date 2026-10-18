@@ -41,6 +41,11 @@ def step_surge_active(context, multiplier):
         multiplier=Decimal(multiplier),
     )
 
+@given("{name} has completed the ride")
+def step_has_completed(context, name):
+    step_has_started(context, name)
+    context.ride.complete()
+
 # ---------------------------------------------------------------------------
 # When
 # ---------------------------------------------------------------------------
@@ -51,6 +56,9 @@ def step_completes(context, name):
         reverse("rides:complete", args=[context.ride.id]), follow=True
     )
 
+@when("{name} opens the receipt for the ride")
+def step_opens_receipt(context, name):
+    context.response = context.client.get(receipt_path(context.ride))
 
 # ---------------------------------------------------------------------------
 # Then
@@ -74,4 +82,10 @@ def step_receipt_shows(context, field, value):
     pattern = rf'id="{element_id}"[^>]*>\s*{re.escape(value)}\s*<'
     assert re.search(pattern, html), (
         f'Expected #{element_id} to show "{value}"'
+    )
+
+@then("{name} gets a {status:d} response")
+def step_gets_status(context, name, status):
+    assert context.response.status_code == status, (
+        f"Expected {status}, got {context.response.status_code}"
     )
