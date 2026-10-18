@@ -173,3 +173,39 @@ def test_owner_post_with_invalid_reason_rerenders_and_leaves_ride(
     accepted_ride.refresh_from_db()
     assert accepted_ride.status == Ride.STATUS_ACCEPTED
     assert accepted_ride.cancellation_reason == ""
+
+# ---------------------------------------------------------------------------
+# Dashboard — Cancel is a link to the confirmation page
+# ---------------------------------------------------------------------------
+
+def test_dashboard_links_to_cancel_page_for_accepted_ride(
+    client, owner, accepted_ride
+):
+    client.force_login(owner)
+
+    response = client.get(reverse("rides:dashboard"))
+
+    assert response.status_code == 200
+    assert f'href="{cancel_url(accepted_ride)}"' in response.content.decode()
+
+
+def test_dashboard_has_no_form_posting_to_cancel_url(
+    client, owner, accepted_ride
+):
+    client.force_login(owner)
+
+    response = client.get(reverse("rides:dashboard"))
+
+    assert response.status_code == 200
+    assert f'action="{cancel_url(accepted_ride)}"' not in response.content.decode()
+
+
+def test_dashboard_has_no_cancel_link_for_started_ride(
+    client, owner, in_progress_ride
+):
+    client.force_login(owner)
+
+    response = client.get(reverse("rides:dashboard"))
+
+    assert response.status_code == 200
+    assert cancel_url(in_progress_ride) not in response.content.decode()
