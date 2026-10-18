@@ -5,10 +5,15 @@ Steps stay declarative: the scenario says *what* the driver does, the
 step code decides *how* (HTTP calls through Django's test client).
 """
 import re
+from datetime import timedelta
+from decimal import Decimal
 
 from behave import given, when, then
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
+
+from rides.models import SurgeRule
 
 
 def receipt_path(ride):
@@ -26,6 +31,15 @@ def step_has_started(context, name):
     context.ride.accept(driver)
     context.ride.start()
 
+@given("a {multiplier}× surge is active")
+def step_surge_active(context, multiplier):
+    now = timezone.now()
+    SurgeRule.objects.create(
+        label="Scenario surge",
+        starts_at=now - timedelta(hours=1),
+        ends_at=now + timedelta(hours=1),
+        multiplier=Decimal(multiplier),
+    )
 
 # ---------------------------------------------------------------------------
 # When
