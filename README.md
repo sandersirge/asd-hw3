@@ -14,6 +14,19 @@ got behind in the lab or want a clean baseline.
 
 ## 1. Setup
 
+> **Python version:** use **Python 3.10 – 3.12** (developed and tested on
+> 3.11). `requirements.txt` pins Django below 5.1, and Django 5.0 does not
+> support Python 3.13+. On Python 3.14 the view tests and Behave scenarios
+> crash whenever a template is rendered (`AttributeError: 'super' object has
+> no attribute 'dicts'` in `django/template/context.py`). The code itself is
+> fine; only the interpreter is unsupported.
+>
+> On Windows, if several Pythons are installed, create the venv explicitly:
+>
+> ```bash
+> py -3.11 -m venv .venv
+> ```
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate           # macOS / Linux
