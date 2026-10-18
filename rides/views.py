@@ -106,8 +106,17 @@ def ride_detail(request, ride_id):
 @login_required
 def receipt(request, ride_id):
     """End-of-trip receipt for a completed ride. Only the assigned
-    driver may see it; anyone else gets a 404."""
+    driver may see it; anyone else gets a 404. A ride that is not yet
+    completed has no receipt, so the driver is sent back to the
+    dashboard with a message."""
     ride = _get_own_ride(request, ride_id)
+    if ride.status != Ride.STATUS_COMPLETED:
+        messages.error(
+            request,
+            f"This ride has no receipt yet — it is "
+            f"{ride.get_status_display().lower()}.",
+        )
+        return redirect(reverse("rides:dashboard"))
     return render(request, "rides/receipt.html", {"ride": ride})
 
 # ---------------------------------------------------------------------------
