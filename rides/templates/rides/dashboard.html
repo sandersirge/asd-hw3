@@ -65,11 +65,10 @@
                         </form>
                     {% endif %}
                     {% if ride.status == 'accepted' or ride.status == 'requested' %}
-                        <form method="post"
-                              action="{% url 'rides:cancel' ride.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="danger">Cancel</button>
-                        </form>
+                        <a href="{% url 'rides:cancel' ride.id %}"
+                           class="button danger">
+                            Cancel
+                        </a>
                     {% endif %}
                 </div>
             </div>
