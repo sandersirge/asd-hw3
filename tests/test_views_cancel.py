@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import pytest
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
 from django.urls import reverse
 
 from rides.models import Ride
@@ -23,7 +24,6 @@ def owner(db):
 def other_driver(db):
     return User.objects.create_user(username="anna", password="x")
 
-
 @pytest.fixture
 def accepted_ride(owner):
     ride = Ride.objects.create(
@@ -34,6 +34,15 @@ def accepted_ride(owner):
     ride.accept(owner)
     return ride
 
+@pytest.fixture
+def in_progress_ride(accepted_ride):
+    accepted_ride.start()
+    return accepted_ride
+
+@pytest.fixture
+def completed_ride(in_progress_ride):
+    in_progress_ride.complete()
+    return in_progress_ride
 
 def cancel_url(ride):
     return reverse("rides:cancel", args=[ride.id])
@@ -77,3 +86,41 @@ def test_other_driver_post_returns_404_and_leaves_ride(
     assert response.status_code == 404
     accepted_ride.refresh_from_db()
     assert accepted_ride.status == Ride.STATUS_ACCEPTED
+
+# ---------------------------------------------------------------------------
+# Owner GET — confirmation page
+# ---------------------------------------------------------------------------
+
+def test_owner_get_on_accepted_ride_renders_form(client, owner, accepted_ride):
+    client.force_login(owner)
+
+    response = client.get(cancel_url(accepted_ride))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "reason" in content
+    assert accepted_ride.pickup_address in content
+
+
+def test_owner_get_on_started_ride_redirects_with_message(
+    client, owner, in_progress_ride
+):
+    client.force_login(owner)
+
+    response = client.get(cancel_url(in_progress_ride))
+
+    assert response.status_code == 302
+    assert response.url == reverse("rides:dashboard")
+    assert len(list(get_messages(response.wsgi_request))) == 1
+
+
+def test_owner_get_on_completed_ride_redirects_with_message(
+    client, owner, completed_ride
+):
+    client.force_login(owner)
+
+    response = client.get(cancel_url(completed_ride))
+
+    assert response.status_code == 302
+    assert response.url == reverse("rides:dashboard")
+    assert len(list(get_messages(response.wsgi_request))) == 1
