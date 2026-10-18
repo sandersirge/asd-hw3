@@ -124,3 +124,52 @@ def test_owner_get_on_completed_ride_redirects_with_message(
     assert response.status_code == 302
     assert response.url == reverse("rides:dashboard")
     assert len(list(get_messages(response.wsgi_request))) == 1
+
+# ---------------------------------------------------------------------------
+# Owner POST — form validation
+# ---------------------------------------------------------------------------
+
+def test_owner_post_with_valid_reason_cancels_and_redirects(
+    client, owner, accepted_ride
+):
+    client.force_login(owner)
+
+    response = client.post(
+        cancel_url(accepted_ride), {"reason": "Flat tire on the highway"}
+    )
+
+    assert response.status_code == 302
+    assert response.url == reverse("rides:dashboard")
+    accepted_ride.refresh_from_db()
+    assert accepted_ride.status == Ride.STATUS_CANCELLED
+    assert accepted_ride.cancellation_reason == "Flat tire on the highway"
+
+
+def test_owner_post_stores_stripped_reason(client, owner, accepted_ride):
+    client.force_login(owner)
+
+    client.post(cancel_url(accepted_ride), {"reason": "   Flat tire   "})
+
+    accepted_ride.refresh_from_db()
+    assert accepted_ride.cancellation_reason == "Flat tire"
+
+
+@pytest.mark.parametrize("bad_reason", [
+    "abcd",            # too short
+    "",                # empty
+    "      ",          # whitespace only
+    "   abcd   ",      # too short once stripped
+    "x" * 501,         # too long
+])
+def test_owner_post_with_invalid_reason_rerenders_and_leaves_ride(
+    client, owner, accepted_ride, bad_reason
+):
+    client.force_login(owner)
+
+    response = client.post(cancel_url(accepted_ride), {"reason": bad_reason})
+
+    assert response.status_code == 200
+    assert "reason" in response.content.decode()
+    accepted_ride.refresh_from_db()
+    assert accepted_ride.status == Ride.STATUS_ACCEPTED
+    assert accepted_ride.cancellation_reason == ""
