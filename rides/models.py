@@ -8,6 +8,8 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+from rides.fares import calculate_fare, surge_multiplier_at
+
 class InvalidTransition(Exception):
     """Raised when a Ride is asked to perform an invalid state transition."""
 
@@ -80,14 +82,20 @@ class Ride(models.Model):
         self.save(update_fields=["status"])
 
     def complete(self):
-        """IN_PROGRESS → COMPLETED. Stamps completed_at."""
+        """IN_PROGRESS → COMPLETED. Stamps completed_at and captures the
+        surge multiplier and final fare in force at that moment."""
         if self.status != self.STATUS_IN_PROGRESS:
             raise InvalidTransition(
                 f"Cannot complete a ride in {self.status!r} state"
             )
+        now = timezone.now()
         self.status = self.STATUS_COMPLETED
-        self.completed_at = timezone.now()
-        self.save(update_fields=["status", "completed_at"])
+        self.completed_at = now
+        self.surge_multiplier = surge_multiplier_at(now)
+        self.fare = calculate_fare(self.distance_km, when=now)
+        self.save(
+            update_fields=["status", "completed_at", "surge_multiplier", "fare"]
+        )
 
     def cancel(self, reason):
         """REQUESTED or ACCEPTED → CANCELLED. Stores reason."""
