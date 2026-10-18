@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-
+from django.core.exceptions import ValidationError
 
 class InvalidTransition(Exception):
     """Raised when a Ride is asked to perform an invalid state transition."""
@@ -109,3 +109,10 @@ class SurgeRule(models.Model):
 
     def __str__(self):
         return f"{self.label} (×{self.multiplier})"
+
+    def clean(self):
+        super().clean()
+        if self.starts_at and self.ends_at and self.ends_at <= self.starts_at:
+            raise ValidationError(
+                {"ends_at": "ends_at must be strictly after starts_at."}
+            )
