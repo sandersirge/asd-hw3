@@ -62,10 +62,13 @@ def complete_ride(request, ride_id):
 
 
 @login_required
-@require_POST
-def cancel_ride(request, ride_id):
-    """Cancel a ride the current driver owns (in any cancellable state)."""
+def confirm_cancel(request, ride_id):
+    """Two-step cancel: GET shows a confirmation page, POST cancels."""
     ride = _get_own_ride(request, ride_id)
+    if request.method != "POST":
+        # Placeholder until the confirmation page exists (next step).
+        return redirect(reverse("rides:dashboard"))
+
     reason = request.POST.get("reason", "").strip() or "Cancelled by driver"
     try:
         ride.cancel(reason)
