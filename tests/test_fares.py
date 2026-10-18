@@ -2,7 +2,7 @@
 Fare calculator tests (pre-built for students).
 """
 from decimal import Decimal
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
@@ -147,3 +147,14 @@ def test_surge_is_applied_before_rounding():
     make_surge("1.25")
 
     assert calculate_fare(Decimal("1.26"), when=DURING_SURGE) == Decimal("5.02")
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("bad_when", [
+    "2026-01-01 18:30",                  # string that looks like a datetime
+    date(2026, 1, 1),                    # date, not datetime
+    1767290400,                          # Unix timestamp
+    18.5,
+])
+def test_non_datetime_when_raises_type_error(bad_when):
+    with pytest.raises(TypeError):
+        calculate_fare(5, when=bad_when)
