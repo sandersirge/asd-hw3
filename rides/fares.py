@@ -1,9 +1,8 @@
 """
 Fare-calculation helpers — pre-built and already tested.
 
-This module is provided as-is so the app runs out of the box. You do not
-need to modify it during the lab (Task 1 is the ride lifecycle in
-rides/models.py). You will extend this function in the homework.
+This is the same calculate_fare() from the lab. You will extend it with
+surge pricing in Homework Task 1.
 
 Tasko's pricing rules:
     fare = max(BASE_FARE + PER_KM_RATE * distance_km, MIN_FARE)

@@ -1,9 +1,5 @@
 """
-Domain model for Tasko.
-
-The base `Ride` model is provided so the application runs out of the box.
-You will extend it during Task 1 of the lab using TDD: write a failing test
-in `tests/test_models.py` first, then add the corresponding behaviour here.
+Domain model for Tasko — TASK 2 reference solution.
 """
 from decimal import Decimal
 
@@ -57,36 +53,44 @@ class Ride(models.Model):
     def __str__(self):
         return f"{self.pickup_address} → {self.dropoff_address}"
 
+    # ------------------------------------------------------------------
+    # Lifecycle methods
+    # ------------------------------------------------------------------
+
     def accept(self, driver):
+        """REQUESTED → ACCEPTED. Assigns the driver."""
         if self.status != self.STATUS_REQUESTED:
             raise InvalidTransition(
-                f"Cannot accept ride in status '{self.status}'."
+                f"Cannot accept a ride in {self.status!r} state"
             )
         self.driver = driver
         self.status = self.STATUS_ACCEPTED
-        self.save(update_fields=["status", "driver"])
+        self.save(update_fields=["driver", "status"])
 
     def start(self):
+        """ACCEPTED → IN_PROGRESS."""
         if self.status != self.STATUS_ACCEPTED:
             raise InvalidTransition(
-                f"Cannot start ride in status '{self.status}'."
+                f"Cannot start a ride in {self.status!r} state"
             )
         self.status = self.STATUS_IN_PROGRESS
         self.save(update_fields=["status"])
 
     def complete(self):
+        """IN_PROGRESS → COMPLETED. Stamps completed_at."""
         if self.status != self.STATUS_IN_PROGRESS:
             raise InvalidTransition(
-                f"Cannot complete ride in status '{self.status}'."
+                f"Cannot complete a ride in {self.status!r} state"
             )
         self.status = self.STATUS_COMPLETED
         self.completed_at = timezone.now()
         self.save(update_fields=["status", "completed_at"])
 
     def cancel(self, reason):
-        if self.status not in [self.STATUS_REQUESTED, self.STATUS_ACCEPTED]:
+        """REQUESTED or ACCEPTED → CANCELLED. Stores reason."""
+        if self.status not in (self.STATUS_REQUESTED, self.STATUS_ACCEPTED):
             raise InvalidTransition(
-                f"Cannot cancel ride in status '{self.status}'."
+                f"Cannot cancel a ride in {self.status!r} state"
             )
         self.status = self.STATUS_CANCELLED
         self.cancellation_reason = reason

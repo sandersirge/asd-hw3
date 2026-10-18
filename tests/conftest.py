@@ -1,6 +1,8 @@
 """
 Project-wide PyTest fixtures.
 
-You may add helpers here during the lab; nothing is required for Task 1 or
-Task 2 — the fixtures shown in the handout live directly in test_models.py.
+You may add shared fixtures here for the homework tasks. None of the three
+homework tasks require it — model, form, and view fixtures can live directly
+in their own test files (tests/test_surge_rule.py, tests/test_views_cancel.py,
+etc.) — but it's here if you want to factor out something shared.
 """

@@ -31,7 +31,7 @@ def accept_ride(request, ride_id):
         ride.accept(request.user)
     except (AttributeError, InvalidTransition) as exc:
         # AttributeError: students have not yet implemented Ride.accept()
-        #   in Task 1 — the action becomes a no-op until they do.
+        #   — the action becomes a no-op until they do.
         # InvalidTransition: the ride is no longer in the requested state.
         messages.error(request, _friendly_error(exc, "accept"))
     return redirect(reverse("rides:dashboard"))
@@ -98,6 +98,6 @@ def _friendly_error(exc, action):
     if isinstance(exc, AttributeError):
         return (
             f"Could not {action} the ride yet — the lifecycle method "
-            f"has not been implemented. Finish Task 1 first."
+            f"has not been implemented."
         )
     return f"Could not {action} the ride: {exc}"

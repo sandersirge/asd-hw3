@@ -1,92 +1,50 @@
-# Tasko — Lab Starter Project
+# Tasko — Homework Starter Project
 
-A minimal Django driver-facing dashboard for **Tasko**, a small ride-hailing
-service. You will extend this project during the lab session by following
-**TDD** (Test-Driven Development) and **BDD** (Behaviour-Driven Development)
-practices.
+This is the starting point for the **TDD and BDD with the Django framework**
+homework assignment. It is a snapshot of the Tasko code base after a
+correctly-completed lab session: the fare calculator, the four lifecycle
+methods on `Ride`, and the BDD acceptance test for "Accept a ride from the
+dashboard" are all in place.
+
+If you completed the lab successfully, you may use **your own code** instead
+of this archive — they are functionally equivalent. Use this archive if you
+got behind in the lab or want a clean baseline.
 
 ---
 
-## 1. Requirements
-
-* Python 3.10 or newer
-* `pip` and a virtual environment tool (`venv`)
-
-## 2. First-Time Setup
+## 1. Setup
 
 ```bash
-# 1. Unpack this archive and enter the directory
-cd tasko_starter
-
-# 2. Create and activate a virtual environment
 python -m venv .venv
 source .venv/bin/activate           # macOS / Linux
 # .venv\Scripts\activate            # Windows PowerShell
 
-# 3. Install dependencies
 pip install -r requirements.txt
-
-# 4. Apply migrations and seed two demo drivers + a few pending rides
 python manage.py migrate
-python manage.py seed_demo
-
-# 5. Run the development server
+python manage.py seed_demo          # 2 demo drivers + 4 pending rides
 python manage.py runserver
-# Open http://127.0.0.1:8000/ and log in as one of the demo drivers
 ```
 
-Two demo drivers are created by `seed_demo`:
+Demo accounts: **mari / tasko123** and **anna / tasko123**.
 
-| Username | Password   |
-|----------|------------|
-| `mari`   | `tasko123` |
-| `anna`   | `tasko123` |
-
-## 3. Running the Tests
+## 2. Confirm the baseline tests pass
 
 ```bash
-# Unit tests (PyTest)
-pytest
-
-# Acceptance tests (Behave via behave-django)
-python manage.py behave
+pytest                              # 28 tests pass
+python manage.py behave             # 1 scenario, 5 steps pass
 ```
 
-A small set of tests for the existing fare calculator is already passing.
-Behave reports **0 features / 0 scenarios** at this point — you will add
-scenarios during the lab.
+If anything fails, fix it before starting the homework.
 
-## 4. Project Layout
+## 3. What you will build
 
-```
-tasko_starter/
-├── manage.py
-├── pytest.ini
-├── requirements.txt
-├── tasko/                          # Django project package
-├── rides/                          # Django app — the dispatcher
-│   ├── models.py                   # Ride model (you extend in Task 1)
-│   ├── fares.py                    # Existing fare calculator — DO NOT change
-│   ├── views.py                    # Dashboard + lifecycle action endpoints
-│   ├── urls.py
-│   ├── templates/rides/            # HTML templates with state-aware buttons
-│   └── management/commands/
-│       └── seed_demo.py
-├── tests/                          # PyTest unit tests
-│   ├── test_fares.py               # Existing — already passing
-│   └── test_models.py              # EMPTY — Task 1
-└── features/                       # Behave BDD tests
-    ├── environment.py
-    ├── driver_dispatching.feature  # EMPTY — Task 2
-    └── steps/
-        └── dispatching_steps.py    # EMPTY — Task 2
-```
+The homework consists of three tasks:
 
-## 5. Where You Will Write Code
+1. **Surge pricing** (TDD) — extend the fare calculator to honour an active
+   `SurgeRule` on top of the base formula.
+2. **Cancellation flow** (TDD + view tests) — let drivers cancel an accepted
+   ride from the dashboard with a reason, verified by view-layer tests.
+3. **End-of-trip receipt** (BDD) — show a completed-ride receipt page with
+   the surge-aware fare breakdown, verified by acceptance scenarios.
 
-| Task | File(s) you edit                                                                |
-|------|---------------------------------------------------------------------------------|
-| 1    | `tests/test_models.py`, then `rides/models.py`                                  |
-| 2    | `features/driver_dispatching.feature`, `features/steps/dispatching_steps.py`    |
-
-After the lab, the same code base will be the basis of a graded homework assignment.
+See the **homework instructions document** for full details and expected deliverables

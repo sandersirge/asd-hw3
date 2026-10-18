@@ -1,18 +1,5 @@
 """
-Task 1 — TDD with PyTest-Django: Ride lifecycle.
-
-You will drive four lifecycle methods into `rides/models.py` using TDD:
-
-    1.  accept(driver)    — REQUESTED      → ACCEPTED;     assigns driver.
-    2.  start()           — ACCEPTED       → IN_PROGRESS.
-    3.  complete()        — IN_PROGRESS    → COMPLETED;    sets completed_at.
-    4.  cancel(reason)    — REQUESTED|ACCEPTED → CANCELLED; stores reason.
-
-Every illegal transition (e.g. completing a requested ride) must raise the
-custom InvalidTransition exception that lives in `rides.models`.
-
-Mark every test that touches the database with @pytest.mark.django_db so
-PyTest-Django creates an isolated test database for you.
+Ride lifecycle tests.
 """
 
 from decimal import Decimal
