@@ -11,6 +11,7 @@ We use Decimal everywhere because float arithmetic on money silently loses
 cents. `Decimal(str(value))` is the safe way to convert from a float without
 inheriting its binary-representation noise.
 """
+from datetime import datetime
 from decimal import Decimal
 
 
@@ -31,6 +32,7 @@ def calculate_fare(distance_km, when=None):
 
     Raises:
         TypeError:  if `distance_km` is not a number (or is a bool).
+        TypeError:  if `when` is neither None nor a datetime.
         ValueError: if `distance_km` is negative.
     """
     # bool is a subclass of int in Python — reject it explicitly so a vote
@@ -54,6 +56,10 @@ def surge_multiplier_at(when):
     """Return the multiplier of the SurgeRule covering `when`, or 1."""
     if when is None:
         return Decimal("1")
+    if not isinstance(when, datetime):
+        raise TypeError(
+            f"when must be a datetime or None, got {type(when).__name__}"
+        )
 
     # Imported here, not at module top: rides.models will import
     # calculate_fare (Ride.complete), so a top-level import would be circular.
