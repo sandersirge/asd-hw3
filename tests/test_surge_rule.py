@@ -92,3 +92,51 @@ def test_covers_rejects_moment_before_start():
 
 def test_covers_rejects_moment_after_end():
     assert make_rule().covers(END + timedelta(minutes=1)) is False
+
+# ---------------------------------------------------------------------------
+# active_at(when) — classmethod lookup
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_active_at_returns_rule_covering_moment():
+    rule = make_rule()
+    rule.save()
+
+    assert SurgeRule.active_at(START + timedelta(minutes=30)) == rule
+
+
+@pytest.mark.django_db
+def test_active_at_returns_rule_at_exact_start():
+    rule = make_rule()
+    rule.save()
+
+    assert SurgeRule.active_at(START) == rule
+
+
+@pytest.mark.django_db
+def test_active_at_returns_none_when_no_rule_matches():
+    make_rule().save()
+
+    assert SurgeRule.active_at(END + timedelta(hours=1)) is None
+
+
+@pytest.mark.django_db
+def test_active_at_returns_none_at_exact_end():
+    make_rule().save()
+
+    assert SurgeRule.active_at(END) is None
+
+
+@pytest.mark.django_db
+def test_active_at_returns_none_when_no_rules_exist():
+    assert SurgeRule.active_at(START) is None
+
+
+@pytest.mark.django_db
+def test_active_at_picks_the_right_rule_among_several():
+    make_rule(label="Morning", starts_at=START - timedelta(hours=10),
+              ends_at=START - timedelta(hours=8)).save()
+    evening = make_rule(label="Evening")
+    evening.save()
+
+    assert SurgeRule.active_at(START + timedelta(hours=1)) == evening

@@ -135,3 +135,7 @@ class SurgeRule(models.Model):
     def covers(self, when):
         """True if `when` falls in the half-open window [starts_at, ends_at)."""
         return self.starts_at <= when < self.ends_at
+
+    @classmethod
+    def active_at(cls, when):
+        return None
