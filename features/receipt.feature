@@ -10,12 +10,14 @@ Feature: End-of-trip receipt
 
   Scenario: Driver views the receipt for a ride they completed
     Given Mari has started the ride
+    And   Mari also has another ride in progress
     When  Mari completes the ride
     Then  Mari sees the receipt for the ride
     And   the receipt shows the distance as "5.00 km"
     And   the receipt shows the total as "8.50 €"
     And   the receipt shows the surge as "None"
     And   Mari's dashboard lists the ride under "Recent completed rides"
+    And   Mari's ride still in progress has no receipt yet
 
   Scenario: Receipt reflects the active surge multiplier
     Given a 1.5× surge is active

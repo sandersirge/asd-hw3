@@ -10,10 +10,11 @@ from decimal import Decimal
 
 from behave import given, when, then
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.utils import timezone
 
-from rides.models import SurgeRule
+from rides.models import Ride, SurgeRule
 
 
 def receipt_path(ride):
@@ -45,6 +46,17 @@ def step_surge_active(context, multiplier):
 def step_has_completed(context, name):
     step_has_started(context, name)
     context.ride.complete()
+
+@given("{name} also has another ride in progress")
+def step_has_another_ride_in_progress(context, name):
+    driver = User.objects.get(username=name.lower())
+    context.other_ride = Ride.objects.create(
+        pickup_address="Tartu Bus Station",
+        dropoff_address="Lõunakeskus",
+        distance_km=Decimal("3.00"),
+    )
+    context.other_ride.accept(driver)
+    context.other_ride.start()
 
 # ---------------------------------------------------------------------------
 # When
@@ -96,3 +108,15 @@ def step_dashboard_lists_ride(context, name, panel):
     assert panel in html, f'Dashboard has no "{panel}" panel'
     link = f'href="{receipt_path(context.ride)}"'
     assert link in html, f"Dashboard does not link to {receipt_path(context.ride)}"
+
+@then("{name}'s ride still in progress has no receipt yet")
+def step_unfinished_ride_has_no_receipt(context, name):
+    response = context.client.get(receipt_path(context.other_ride))
+    assert response.status_code == 302, (
+        f"Expected a redirect, got {response.status_code}"
+    )
+    assert response.url == reverse("rides:dashboard"), (
+        f"Expected redirect to the dashboard, got {response.url}"
+    )
+    flashed = list(get_messages(response.wsgi_request))
+    assert len(flashed) == 1, f"Expected 1 flash message, got {len(flashed)}"
