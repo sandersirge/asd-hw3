@@ -89,3 +89,10 @@ def step_gets_status(context, name, status):
     assert context.response.status_code == status, (
         f"Expected {status}, got {context.response.status_code}"
     )
+
+@then('{name}\'s dashboard lists the ride under "{panel}"')
+def step_dashboard_lists_ride(context, name, panel):
+    html = context.client.get(reverse("rides:dashboard")).content.decode()
+    assert panel in html, f'Dashboard has no "{panel}" panel'
+    link = f'href="{receipt_path(context.ride)}"'
+    assert link in html, f"Dashboard does not link to {receipt_path(context.ride)}"
