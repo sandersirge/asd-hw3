@@ -20,7 +20,7 @@ MIN_FARE = Decimal("4.00")
 _CENTS = Decimal("0.01")
 
 
-def calculate_fare(distance_km):
+def calculate_fare(distance_km, when=None):
     """Return the fare in euros for a trip of `distance_km` kilometres.
 
     Args:

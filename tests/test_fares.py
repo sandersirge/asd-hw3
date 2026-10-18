@@ -2,10 +2,12 @@
 Fare calculator tests (pre-built for students).
 """
 from decimal import Decimal
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
 from rides.fares import calculate_fare
+from rides.models import SurgeRule
 
 
 # ---------------------------------------------------------------------------
@@ -77,3 +79,71 @@ def test_result_is_always_a_decimal():
 def test_result_is_quantised_to_two_places():
     """3.333 km → raw = 6.4996 → must round to 6.50, not 6.4996."""
     assert calculate_fare(Decimal("3.333")) == Decimal("6.50")
+
+# ---------------------------------------------------------------------------
+# Surge pricing (Homework Task 1)
+# ---------------------------------------------------------------------------
+
+SURGE_START = datetime(2026, 1, 1, 18, 0, tzinfo=timezone.utc)
+SURGE_END = SURGE_START + timedelta(hours=2)
+DURING_SURGE = SURGE_START + timedelta(minutes=30)
+
+
+def make_surge(multiplier):
+    return SurgeRule.objects.create(
+        label="Evening rush",
+        starts_at=SURGE_START,
+        ends_at=SURGE_END,
+        multiplier=Decimal(multiplier),
+    )
+
+
+@pytest.mark.django_db
+def test_surge_1_5_applies_when_rule_covers_moment():
+    make_surge("1.5")
+
+    assert calculate_fare(5, when=DURING_SURGE) == Decimal("12.75")
+
+
+@pytest.mark.django_db
+def test_no_surge_when_no_rule_covers_moment():
+    make_surge("1.5")
+
+    assert calculate_fare(5, when=SURGE_END + timedelta(hours=1)) == Decimal("8.50")
+
+
+@pytest.mark.django_db
+def test_surge_2_0_doubles_the_minimum_fare():
+    make_surge("2.0")
+
+    assert calculate_fare(0, when=DURING_SURGE) == Decimal("8.00")
+
+
+@pytest.mark.django_db
+def test_base_multiplier_at_exact_end_of_window():
+    make_surge("1.5")
+
+    assert calculate_fare(5, when=SURGE_END) == Decimal("8.50")
+
+
+@pytest.mark.django_db
+def test_surge_applies_at_exact_start_of_window():
+    make_surge("1.5")
+
+    assert calculate_fare(5, when=SURGE_START) == Decimal("12.75")
+
+
+@pytest.mark.django_db
+def test_when_none_ignores_active_surge():
+    make_surge("1.5")
+
+    assert calculate_fare(5) == Decimal("8.50")
+
+
+@pytest.mark.django_db
+def test_surge_is_applied_before_rounding():
+    """1.26 km → raw 4.012. Surge first: 4.012 × 1.25 = 5.015 → 5.02.
+    Rounding first would give 4.01 × 1.25 = 5.0125 → 5.01."""
+    make_surge("1.25")
+
+    assert calculate_fare(Decimal("1.26"), when=DURING_SURGE) == Decimal("5.02")
