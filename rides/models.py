@@ -95,3 +95,17 @@ class Ride(models.Model):
         self.status = self.STATUS_CANCELLED
         self.cancellation_reason = reason
         self.save(update_fields=["status", "cancellation_reason"])
+
+class SurgeRule(models.Model):
+    """A time window during which fares are multiplied."""
+
+    label = models.CharField(max_length=50)
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField()
+    multiplier = models.DecimalField(max_digits=3, decimal_places=2)
+
+    class Meta:
+        ordering = ["starts_at"]
+
+    def __str__(self):
+        return f"{self.label} (×{self.multiplier})"
