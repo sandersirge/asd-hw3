@@ -33,6 +33,9 @@ class Ride(models.Model):
     fare = models.DecimalField(
         max_digits=8, decimal_places=2, default=Decimal("0.00")
     )
+    surge_multiplier = models.DecimalField(
+        max_digits=3, decimal_places=2, default=Decimal("1.00")
+    )
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default=STATUS_REQUESTED
     )
