@@ -47,3 +47,21 @@ def test_full_clean_accepts_ends_at_after_starts_at():
     rule = make_rule()
 
     rule.full_clean()  # must not raise
+
+# ---------------------------------------------------------------------------
+# Multiplier validation
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("bad", ["0.50", "1.10", "1.30", "2.25", "2.50", "3.00"])
+def test_full_clean_rejects_non_canonical_multiplier(bad):
+    rule = make_rule(multiplier=Decimal(bad))
+
+    with pytest.raises(ValidationError):
+        rule.full_clean()
+
+
+@pytest.mark.parametrize("good", ["1.0", "1.25", "1.5", "1.75", "2.0"])
+def test_full_clean_accepts_canonical_multiplier(good):
+    rule = make_rule(multiplier=Decimal(good))
+
+    rule.full_clean()  # must not raise
