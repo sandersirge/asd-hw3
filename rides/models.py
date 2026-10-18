@@ -131,3 +131,6 @@ class SurgeRule(models.Model):
             errors["multiplier"] = f"multiplier must be one of: {allowed}."
         if errors:
             raise ValidationError(errors)
+
+    def covers(self, when):
+        return False
