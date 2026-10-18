@@ -133,4 +133,5 @@ class SurgeRule(models.Model):
             raise ValidationError(errors)
 
     def covers(self, when):
-        return False
+        """True if `when` falls in the half-open window [starts_at, ends_at)."""
+        return self.starts_at <= when < self.ends_at
