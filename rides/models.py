@@ -99,6 +99,14 @@ class Ride(models.Model):
 class SurgeRule(models.Model):
     """A time window during which fares are multiplied."""
 
+    ALLOWED_MULTIPLIERS = (
+        Decimal("1.0"),
+        Decimal("1.25"),
+        Decimal("1.5"),
+        Decimal("1.75"),
+        Decimal("2.0"),
+    )
+
     label = models.CharField(max_length=50)
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
@@ -112,7 +120,14 @@ class SurgeRule(models.Model):
 
     def clean(self):
         super().clean()
+        errors = {}
         if self.starts_at and self.ends_at and self.ends_at <= self.starts_at:
-            raise ValidationError(
-                {"ends_at": "ends_at must be strictly after starts_at."}
-            )
+            errors["ends_at"] = "ends_at must be strictly after starts_at."
+        if (
+            self.multiplier is not None
+            and self.multiplier not in self.ALLOWED_MULTIPLIERS
+        ):
+            allowed = ", ".join(str(m) for m in self.ALLOWED_MULTIPLIERS)
+            errors["multiplier"] = f"multiplier must be one of: {allowed}."
+        if errors:
+            raise ValidationError(errors)
