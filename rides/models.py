@@ -138,4 +138,10 @@ class SurgeRule(models.Model):
 
     @classmethod
     def active_at(cls, when):
-        return None
+        """Return the SurgeRule covering `when`, or None."""
+        return (
+            cls.objects
+            .filter(starts_at__lte=when, ends_at__gt=when)
+            .order_by("starts_at")
+            .first()
+        )
