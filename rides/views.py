@@ -74,18 +74,21 @@ def confirm_cancel(request, ride_id):
         return redirect(reverse("rides:dashboard"))
 
     if request.method != "POST":
-        return render(
-            request,
-            "rides/confirm_cancel.html",
-            {"ride": ride, "form": CancelRideForm()},
-        )
+        form = CancelRideForm()
+    else:
+        form = CancelRideForm(request.POST)
+        if form.is_valid():
+            try:
+                ride.cancel(form.cleaned_data["reason"])
+            except (AttributeError, InvalidTransition) as exc:
+                messages.error(request, _friendly_error(exc, "cancel"))
+            return redirect(reverse("rides:dashboard"))
 
-    reason = request.POST.get("reason", "").strip() or "Cancelled by driver"
-    try:
-        ride.cancel(reason)
-    except (AttributeError, InvalidTransition) as exc:
-        messages.error(request, _friendly_error(exc, "cancel"))
-    return redirect(reverse("rides:dashboard"))
+    return render(
+        request,
+        "rides/confirm_cancel.html",
+        {"ride": ride, "form": form},
+    )
 
 
 @login_required
