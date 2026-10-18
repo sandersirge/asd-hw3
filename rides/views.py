@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .models import InvalidTransition, Ride
-
+from .forms import CancelRideForm
 
 @login_required
 def dashboard(request):
@@ -65,9 +65,20 @@ def complete_ride(request, ride_id):
 def confirm_cancel(request, ride_id):
     """Two-step cancel: GET shows a confirmation page, POST cancels."""
     ride = _get_own_ride(request, ride_id)
-    if request.method != "POST":
-        # Placeholder until the confirmation page exists (next step).
+    if ride.status not in (Ride.STATUS_REQUESTED, Ride.STATUS_ACCEPTED):
+        messages.error(
+            request,
+            f"This ride can no longer be cancelled — it is "
+            f"{ride.get_status_display().lower()}.",
+        )
         return redirect(reverse("rides:dashboard"))
+
+    if request.method != "POST":
+        return render(
+            request,
+            "rides/confirm_cancel.html",
+            {"ride": ride, "form": CancelRideForm()},
+        )
 
     reason = request.POST.get("reason", "").strip() or "Cancelled by driver"
     try:

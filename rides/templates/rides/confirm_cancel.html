@@ -1,0 +1,25 @@
+{% extends "rides/base.html" %}
+{% block title %}Cancel ride — Tasko{% endblock %}
+{% block content %}
+    <h2>Cancel this ride?</h2>
+
+    <div class="ride">
+        <h4>{{ ride.pickup_address }} → {{ ride.dropoff_address }}</h4>
+        <p class="meta">
+            <span class="status-{{ ride.status }}">
+                {{ ride.get_status_display }}
+            </span>
+            · {{ ride.distance_km }} km
+        </p>
+    </div>
+
+    <form method="post" action="{% url 'rides:cancel' ride.id %}"
+          class="login">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="actions">
+            <button type="submit" class="danger">Cancel ride</button>
+            <a href="{% url 'rides:dashboard' %}">Keep ride</a>
+        </div>
+    </form>
+{% endblock %}
