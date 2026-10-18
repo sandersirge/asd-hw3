@@ -14,8 +14,14 @@
             <dt>Distance</dt>
             <dd id="receipt-distance">{{ ride.distance_km }} km</dd>
 
+            <dt>Base fare</dt>
+            <dd id="receipt-base-fare">{{ ride.base_fare }} €</dd>
+
             <dt>Surge</dt>
             <dd id="receipt-surge">{% if ride.surge_multiplier == 1 %}None{% else %}×{{ ride.surge_multiplier }}{% endif %}</dd>
+
+            <dt>Surge amount</dt>
+            <dd id="receipt-surge-amount">{{ ride.surge_amount }} €</dd>
 
             <dt>Total</dt>
             <dd id="receipt-total" class="total">{{ ride.fare }} €</dd>

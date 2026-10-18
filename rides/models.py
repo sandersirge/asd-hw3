@@ -58,6 +58,15 @@ class Ride(models.Model):
     def __str__(self):
         return f"{self.pickup_address} → {self.dropoff_address}"
 
+    @property
+    def base_fare(self):
+        """Fare for this distance without any surge."""
+        return calculate_fare(self.distance_km)
+
+    @property
+    def surge_amount(self):
+        """Extra euros charged on top of the base fare by the surge."""
+        return self.fare - self.base_fare
     # ------------------------------------------------------------------
     # Lifecycle methods
     # ------------------------------------------------------------------
