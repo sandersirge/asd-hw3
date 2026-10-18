@@ -76,4 +76,25 @@
     {% else %}
         <p class="empty">You have no active rides.</p>
     {% endif %}
+
+    <h3>Recent completed rides</h3>
+    {% if recent_completed %}
+        {% for ride in recent_completed %}
+            <div class="ride">
+                <h4>
+                    <a href="{% url 'rides:receipt' ride.id %}">
+                        {{ ride.pickup_address }} → {{ ride.dropoff_address }}
+                    </a>
+                </h4>
+                <p class="meta">
+                    {{ ride.completed_at|date:"Y-m-d H:i" }}
+                    · {{ ride.distance_km }} km
+                    · {{ ride.fare }} €
+                    {% if ride.surge_multiplier != 1 %} · ×{{ ride.surge_multiplier }}{% endif %}
+                </p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty">No completed rides yet.</p>
+    {% endif %}
 {% endblock %}

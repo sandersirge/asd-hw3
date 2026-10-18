@@ -10,15 +10,19 @@ from .forms import CancelRideForm
 
 @login_required
 def dashboard(request):
-    """Driver dashboard: pending requests + my active rides."""
+    """Driver dashboard: pending requests, my active rides, and my most
+    recently completed rides."""
     pending = Ride.objects.filter(status=Ride.STATUS_REQUESTED)
     mine = Ride.objects.filter(driver=request.user).exclude(
         status__in=[Ride.STATUS_COMPLETED, Ride.STATUS_CANCELLED]
     )
+    recent_completed = Ride.objects.filter(
+        driver=request.user, status=Ride.STATUS_COMPLETED
+    ).order_by("-completed_at")[:5]
     return render(
         request,
         "rides/dashboard.html",
-        {"pending": pending, "mine": mine},
+        {"pending": pending, "mine": mine, "recent_completed": recent_completed},
     )
 
 
