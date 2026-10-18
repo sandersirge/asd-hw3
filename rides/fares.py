@@ -47,4 +47,17 @@ def calculate_fare(distance_km, when=None):
         raise ValueError("distance_km cannot be negative")
 
     raw = BASE_FARE + PER_KM_RATE * distance
-    return max(raw, MIN_FARE).quantize(_CENTS)
+    fare = max(raw, MIN_FARE) * surge_multiplier_at(when)
+    return fare.quantize(_CENTS)
+
+def surge_multiplier_at(when):
+    """Return the multiplier of the SurgeRule covering `when`, or 1."""
+    if when is None:
+        return Decimal("1")
+
+    # Imported here, not at module top: rides.models will import
+    # calculate_fare (Ride.complete), so a top-level import would be circular.
+    from rides.models import SurgeRule
+
+    rule = SurgeRule.active_at(when)
+    return rule.multiplier if rule is not None else Decimal("1")
